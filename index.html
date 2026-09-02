@@ -7,29 +7,26 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ITIL Pocket Ops">
-<meta name="description" content="Mobiele ITIL 4 Foundation leergame met 254 oefenvragen en proefexamen.">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css">
 <title>ITIL 4 Pocket Ops</title>
+<style>
+html,body{margin:0;background:#07101e;color:#f4f8ff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif}main{min-height:100dvh;display:grid;place-items:center;text-align:center;padding:24px;box-sizing:border-box}p{color:#9fb0c7}
+</style>
 </head>
 <body>
-<div id="loading" style="min-height:100dvh;display:grid;place-items:center;background:#07101e;color:#f4f8ff;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;padding:24px;text-align:center">
-  <div><div style="font-size:48px">🛡️</div><h1 style="margin:10px 0 6px">ITIL 4 Pocket Ops</h1><p style="color:#9fb0c7">Gamegegevens laden…</p></div>
-</div>
-<script id="gameData" type="application/json"></script>
+<main><div><div style="font-size:52px">🛡️</div><h1>ITIL 4 Pocket Ops</h1><p>Volledige game laden…</p></div></main>
 <script>
 (async()=>{
   try{
-    const b64=(await fetch('data.txt',{cache:'force-cache'}).then(r=>r.text())).trim();
+    const names=['game0.txt','game1.txt','game2.txt','game3.txt','game4.txt','game5.txt'];
+    const parts=await Promise.all(names.map(n=>fetch(n,{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('Mist '+n);return r.text()})));
+    const b64=parts.join('').trim();
     const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
-    const ds=new DecompressionStream('gzip');
-    const text=await new Response(new Blob([bytes]).stream().pipeThrough(ds)).text();
-    document.getElementById('gameData').textContent=text;
-    document.getElementById('loading').remove();
-    const s=document.createElement('script'); s.src='app.js'; document.body.appendChild(s);
-    if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+    if(typeof DecompressionStream==='undefined') throw new Error('Safari-versie ondersteunt decomprimeren niet');
+    const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+    const full=await new Response(stream).text();
+    document.open();document.write(full);document.close();
   }catch(e){
-    document.getElementById('loading').innerHTML='<div><div style="font-size:48px">⚠️</div><h1>Kon de game niet laden</h1><p style="color:#9fb0c7">Ververs de pagina in Safari. Fout: '+String(e)+'</p></div>';
+    document.querySelector('main').innerHTML='<div><div style="font-size:52px">⚠️</div><h1>Laden mislukt</h1><p>Ververs de pagina in Safari.<br>'+String(e)+'</p></div>';
   }
 })();
 </script>
