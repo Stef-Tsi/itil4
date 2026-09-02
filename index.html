@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#07101e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ITIL Pocket Ops">
+<meta name="description" content="Mobiele ITIL 4 Foundation leergame met 254 oefenvragen en proefexamen.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css">
+<title>ITIL 4 Pocket Ops</title>
+</head>
+<body>
+<div id="loading" style="min-height:100dvh;display:grid;place-items:center;background:#07101e;color:#f4f8ff;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;padding:24px;text-align:center">
+  <div><div style="font-size:48px">🛡️</div><h1 style="margin:10px 0 6px">ITIL 4 Pocket Ops</h1><p style="color:#9fb0c7">Gamegegevens laden…</p></div>
+</div>
+<script id="gameData" type="application/json"></script>
+<script>
+(async()=>{
+  try{
+    const b64=(await fetch('data.txt',{cache:'force-cache'}).then(r=>r.text())).trim();
+    const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+    const ds=new DecompressionStream('gzip');
+    const text=await new Response(new Blob([bytes]).stream().pipeThrough(ds)).text();
+    document.getElementById('gameData').textContent=text;
+    document.getElementById('loading').remove();
+    const s=document.createElement('script'); s.src='app.js'; document.body.appendChild(s);
+    if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+  }catch(e){
+    document.getElementById('loading').innerHTML='<div><div style="font-size:48px">⚠️</div><h1>Kon de game niet laden</h1><p style="color:#9fb0c7">Ververs de pagina in Safari. Fout: '+String(e)+'</p></div>';
+  }
+})();
+</script>
+</body>
+</html>
