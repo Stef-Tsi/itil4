@@ -6,28 +6,36 @@
 <meta name="theme-color" content="#07101e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="ITIL Pocket Ops">
+<meta name="apple-mobile-web-app-title" content="ITIL 4 Pocket Ops">
 <title>ITIL 4 Pocket Ops</title>
 <style>
-html,body{margin:0;background:#07101e;color:#f4f8ff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif}main{min-height:100dvh;display:grid;place-items:center;text-align:center;padding:24px;box-sizing:border-box}p{color:#9fb0c7}
+html,body{margin:0;min-height:100%;background:#07101e;color:#f4f8ff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif}main{min-height:100dvh;display:grid;place-items:center;padding:28px;text-align:center;box-sizing:border-box}.orb{font-size:56px}.bar{width:min(320px,80vw);height:10px;border-radius:999px;background:#142239;overflow:hidden;margin:22px auto}.fill{height:100%;width:15%;background:#35d3c1;border-radius:inherit;animation:load 1.3s ease-in-out infinite alternate}@keyframes load{to{width:88%}}p{color:#9fb0c7;line-height:1.5}button{border:0;border-radius:14px;padding:14px 18px;background:#35d3c1;color:#05111b;font-weight:800;font-size:16px}
 </style>
 </head>
 <body>
-<main><div><div style="font-size:52px">🛡️</div><h1>ITIL 4 Pocket Ops</h1><p>Volledige game laden…</p></div></main>
+<main id="loader"><div><div class="orb">🛡️</div><h1>ITIL 4 Pocket Ops</h1><p>Volledige mobiele game laden…</p><div class="bar"><div class="fill"></div></div><p id="status">Gamegegevens ophalen</p></div></main>
 <script>
 (async()=>{
-  try{
-    const names=['game0.txt','game1.txt','game2.txt','game3.txt','game4.txt','game5.txt'];
-    const parts=await Promise.all(names.map(n=>fetch(n,{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('Mist '+n);return r.text()})));
-    const b64=parts.join('').trim();
-    const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
-    if(typeof DecompressionStream==='undefined') throw new Error('Safari-versie ondersteunt decomprimeren niet');
-    const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
-    const full=await new Response(stream).text();
-    document.open();document.write(full);document.close();
-  }catch(e){
-    document.querySelector('main').innerHTML='<div><div style="font-size:52px">⚠️</div><h1>Laden mislukt</h1><p>Ververs de pagina in Safari.<br>'+String(e)+'</p></div>';
+ const status=document.getElementById('status');
+ try{
+  const parts=[];
+  for(let i=0;i<6;i++){
+   status.textContent=`Gamegegevens ophalen ${i+1}/6`;
+   const r=await fetch(`game${i}.txt`,{cache:'force-cache'});
+   if(!r.ok) throw new Error(`game${i}.txt ontbreekt`);
+   parts.push((await r.text()).trim());
   }
+  status.textContent='Game uitpakken…';
+  const b64=parts.join('');
+  const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+  if(!('DecompressionStream' in window)) throw new Error('Deze Safari-versie ondersteunt uitpakken niet. Update iOS/Safari.');
+  const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  const html=await new Response(stream).text();
+  if(!html.toLowerCase().includes('<!doctype html')) throw new Error('Gamebestand kon niet worden gecontroleerd.');
+  document.open();document.write(html);document.close();
+ }catch(e){
+  document.getElementById('loader').innerHTML=`<div><div class="orb">⚠️</div><h1>Laden mislukt</h1><p>${String(e.message||e)}</p><button onclick="location.reload()">Opnieuw proberen</button></div>`;
+ }
 })();
 </script>
 </body>
