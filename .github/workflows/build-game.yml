@@ -1,0 +1,42 @@
+name: Build standalone ITIL game
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Build standalone HTML
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat game0.txt game1.txt game2.txt game3.txt game4.txt game5.txt > game.b64
+          base64 --decode game.b64 | gzip --decompress --stdout > play.html
+          test -s play.html
+          grep -qi '<!doctype html' play.html
+          grep -qi 'ITIL' play.html
+          rm game.b64
+          echo "Built play.html: $(wc -c < play.html) bytes"
+
+      - name: Commit built game
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add play.html
+          if git diff --cached --quiet; then
+            echo "play.html already up to date"
+          else
+            git commit -m "Build standalone mobile game [skip ci]"
+            git push
+          fi
