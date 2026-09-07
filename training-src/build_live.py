@@ -1,6 +1,6 @@
 """Build an uncompressed Service Quest training edition; preserve the original export."""
 from pathlib import Path
-import json, shutil
+import json, shutil, hashlib
 ROOT=Path(__file__).resolve().parent.parent
 SRC=ROOT/'training-src'
 OUT=ROOT/'training'
@@ -49,6 +49,10 @@ for f in ('training.js','training.css'):shutil.copy2(SRC/f,OUT/f)
 p=OUT/'index.html';s=p.read_text(encoding='utf-8')
 s=s.replace('182<!-- --> original questions',str(182+len(questions))+'<!-- --> original questions')
 s=s.replace('<head>','<head><link rel="stylesheet" href="training.css"><script src="training-data.js"></script><script src="training.js" defer></script>',1)
+# Version only changed UI assets, keeping the same origin and local save key.
+for asset in ('training.js','training.css'):
+    digest=hashlib.sha256((OUT/asset).read_bytes()).hexdigest()[:12]
+    s=s.replace('"'+asset+'"','"'+asset+'?v='+digest+'"')
 p.write_text(s,encoding='utf-8')
 p=OUT/'_next/static/chunks/game-DXb1F_Z4.js';s=p.read_text(encoding='utf-8')
 old='value:`missions`,children:['
