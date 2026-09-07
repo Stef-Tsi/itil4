@@ -1,0 +1,62 @@
+[
+  {
+    "browser": "chromium",
+    "url": "http://127.0.0.1:8765/Stef-Tsi/itil4/preview-service-quest/service-quest-preview/index.html",
+    "viewport": "430x932",
+    "errors": [],
+    "failedResponses": [],
+    "status": 200,
+    "title": "Service Quest | ITIL 4 Foundation",
+    "headings": [
+      "One minute. One useful idea.",
+      "The city stops paying."
+    ],
+    "buttons": [
+      "Voice",
+      "",
+      "Play episode",
+      "",
+      "",
+      "",
+      "English voice",
+      "01The city stops paying.Incident → problem → known errorOne story · one move",
+      "02A target is not a plan.Choose the destination. Plan the route. Act.One story · one move",
+      "03Find the right container.SVS, value chain and guiding principlesOne story · one move"
+    ],
+    "bodyExcerpt": "SERVICEQUEST\nITIL 4 FOUNDATION\n0 XP\nWatch & play\nMissions\nLearn\nSmart review\nExam arena\nMy progress\n\nWATCH & PLAY · MADE FOR YOUR TRICKY TOPICS\n\nOne minute. One useful idea.\n\nWatch a short story. Make one move. Stop whenever you like.\n\nNOVA CITY · EPISODE 01\n1 / 5 scenes\nSHORT ANIMATION · ENGLISH AUDIO\nThe city stops paying.\n\nIncident → problem → known error\n\nPlay episode\nEnglish voice\nx\n\nPlay restarts the current scene. Your place is kept while you stay in this tab.\n\nSHORT STORIES FOR YOUR WEAK SPOTS\n\n01\nThe city stops paying.\nIncident → problem → known error\nOne story · one move\n02\nA target is not a plan.\nChoose the destination. Plan the route. Act.\nOne story · one move\n03\nFind the right container.\nSVS, value chain and guiding principles\nOne story · one move\n\nChange the speaker or pace with Voice at the top. Each story stops on its own.\n\nWatched episodes are saved on this device. Viewing and guided choices do not count as exam mastery.\n\n● Progress saved in this browser on this device\n182 original questions · ITIL 4 Foundation · English\nContent, sources & study notes",
+    "horizontalOverflow": false,
+    "voiceDialogOpened": true,
+    "dialogText": "Your listening voice\n\nChoose an English voice and a comfortable pace. Your choice is saved on this device.\n\nEnglish voice\nAutomatic · best available\nReading pace\n0.95×\nPreview voice\nYour browser has not offered English voices yet. Preview will try its default English voice.\nClose",
+    "passed": true
+  },
+  {
+    "browser": "webkit",
+    "url": "http://127.0.0.1:8765/Stef-Tsi/itil4/preview-service-quest/service-quest-preview/index.html",
+    "viewport": "430x932",
+    "errors": [],
+    "failedResponses": [],
+    "status": 200,
+    "title": "Service Quest | ITIL 4 Foundation",
+    "headings": [
+      "One minute. One useful idea.",
+      "The city stops paying."
+    ],
+    "buttons": [
+      "Voice",
+      "",
+      "Play episode",
+      "",
+      "",
+      "",
+      "English voice",
+      "01The city stops paying.Incident → problem → known errorOne story · one move",
+      "02A target is not a plan.Choose the destination. Plan the route. Act.One story · one move",
+      "03Find the right container.SVS, value chain and guiding principlesOne story · one move"
+    ],
+    "bodyExcerpt": "SERVICEQUEST\nITIL 4 FOUNDATION\n\n0 XP\n\nWatch & play\nMissions\nLearn\nSmart review\nExam arena\nMy progress\nWATCH & PLAY · MADE FOR YOUR TRICKY TOPICS\nOne minute. One useful idea.\nWatch a short story. Make one move. Stop whenever you like.\nNOVA CITY · EPISODE 01\n1 / 5 scenes\n\nSHORT ANIMATION · ENGLISH AUDIO\nThe city stops paying.\nIncident → problem → known error\nPlay episode\n\n\n\n\nEnglish voice\nx\nPlay restarts the current scene. Your place is kept while you stay in this tab.\nSHORT STORIES FOR YOUR WEAK SPOTS\n\n\n01\nThe city stops paying.\nIncident → problem → known error\nOne story · one move\n\n02\nA target is not a plan.\nChoose the destination. Plan the route. Act.\nOne story · one move\n\n03\nFind the right container.\nSVS, value chain and guiding principles\nOne story · one move\nChange the speaker or pace with Voice at the top. Each story stops on its own.\nWatched episodes are saved on this device. Viewing and guided choices do not count as exam mastery.\n● Progress saved in this browser on this device\n182 original questions · ITIL 4 Foundation · English\nContent, sources & study notes\n",
+    "horizontalOverflow": false,
+    "voiceDialogOpened": true,
+    "dialogText": "Your listening voice\nChoose an English voice and a comfortable pace. Your choice is saved on this device.\nEnglish voice\n\nAutomatic · best available\n\nReading pace\n\n0.95×\n\nPreview voice\nUsing kal · en-US. Voice quality and choice depend on your browser and installed voices.\nClose",
+    "passed": true
+  }
+]
