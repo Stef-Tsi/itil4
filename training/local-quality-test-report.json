@@ -1,0 +1,58 @@
+[
+  {
+    "engine": "chromium",
+    "url": "http://127.0.0.1:8765/Stef-Tsi/itil4/service-quest-training/training/index.html",
+    "viewport": "430x932",
+    "checks": [
+      "523 total cards; 157 curated contrast questions; 14 coherent matching families",
+      "1400 generated tasks contain only same-family choices; 200 exams have 40 unique curated cards and exact criterion distribution",
+      "Related pharmacy case: pointer drag, tap, moving a placed term, red/green feedback and specific NL distinctions work",
+      "An unfinished coherent mission resumes after reload; earlier XP remains saved",
+      "3-choice roles/changes, 4 dimensions and 5 SVS components score correctly without unrelated padding",
+      "Completed 20 mixed tasks: seven different coherent families plus 13 curated MCQs, with correct total scoring",
+      "Contrast and warm-up pools are separate; wrong MCQs have Dutch explanation; Learn first still works",
+      "Original Exam arena remains accessible; no missing assets, page errors or horizontal mobile overflow"
+    ],
+    "errors": [],
+    "failedResponses": [],
+    "all": 523,
+    "strict": 157,
+    "groups": 14,
+    "generatedMatchingTasks": 1400,
+    "examSamples": 200,
+    "examButtons": [
+      "Voice",
+      "",
+      "Enter exam arena"
+    ],
+    "passed": true
+  },
+  {
+    "engine": "webkit",
+    "url": "http://127.0.0.1:8765/Stef-Tsi/itil4/service-quest-training/training/index.html",
+    "viewport": "430x932",
+    "checks": [
+      "523 total cards; 157 curated contrast questions; 14 coherent matching families",
+      "1400 generated tasks contain only same-family choices; 200 exams have 40 unique curated cards and exact criterion distribution",
+      "Related pharmacy case: pointer drag, tap, moving a placed term, red/green feedback and specific NL distinctions work",
+      "An unfinished coherent mission resumes after reload; earlier XP remains saved",
+      "3-choice roles/changes, 4 dimensions and 5 SVS components score correctly without unrelated padding",
+      "Completed 20 mixed tasks: seven different coherent families plus 13 curated MCQs, with correct total scoring",
+      "Contrast and warm-up pools are separate; wrong MCQs have Dutch explanation; Learn first still works",
+      "Original Exam arena remains accessible; no missing assets, page errors or horizontal mobile overflow"
+    ],
+    "errors": [],
+    "failedResponses": [],
+    "all": 523,
+    "strict": 157,
+    "groups": 14,
+    "generatedMatchingTasks": 1400,
+    "examSamples": 200,
+    "examButtons": [
+      "Voice",
+      "",
+      "Enter exam arena"
+    ],
+    "passed": true
+  }
+]

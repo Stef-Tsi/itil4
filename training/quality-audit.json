@@ -1,0 +1,62 @@
+{
+  "version": "coherent-contrast-1",
+  "newContrastQuestions": 77,
+  "reviewedExistingQuestions": 80,
+  "strictQuestionCount": 157,
+  "warmupCards": 366,
+  "totalQuestionCards": 523,
+  "matchingFamilies": 14,
+  "matchingSituations": 15,
+  "strictByCriterion": {
+    "1.1": 9,
+    "1.2": 8,
+    "1.3": 5,
+    "2.1": 5,
+    "2.2": 19,
+    "3.1": 9,
+    "4.1": 6,
+    "5.1": 4,
+    "5.2": 12,
+    "6.1": 25,
+    "6.2": 8,
+    "7.1": 47
+  },
+  "examBlueprint": {
+    "1.1": 2,
+    "1.2": 2,
+    "1.3": 1,
+    "2.1": 1,
+    "2.2": 5,
+    "3.1": 2,
+    "4.1": 1,
+    "5.1": 1,
+    "5.2": 1,
+    "6.1": 5,
+    "6.2": 2,
+    "7.1": 17
+  },
+  "qualityChecks": [
+    "All 77 new questions and 80 existing exam-style questions reviewed for one defensible keyed answer and related distractors",
+    "Every strict question has comparative Dutch feedback",
+    "Basic automatic term drills excluded from exam and default missions",
+    "All matching statements and choices drawn from one explicitly defined family",
+    "No unrelated padding for families with only three or four valid terms",
+    "Question and answer order shuffled; topic labels hidden before answering",
+    "No claim of calibrated difficulty or guaranteed exam success"
+  ],
+  "limitations": [
+    "The 366 basic cards are retained as warm-up material, not independently certified exam preparation.",
+    "Bank difficulty has not been measured against real exam cohorts.",
+    "Matching is an instructional format, not the official exam format."
+  ],
+  "references": [
+    {
+      "label": "PeopleCert ITIL 4 Foundation exam format",
+      "url": "https://www.peoplecert.org/browse-certifications/it-governance-and-service-management/ITIL-1/itil-4-foundation-2565"
+    },
+    {
+      "label": "AXELOS Foundation sample paper (2019): format reference, not copied into this bank",
+      "url": "https://www.globalknowledge.com/-/media/global-knowledge/documents/customer-documents/itil-foundation/2-enitil4fnd2019samplepaper1questionbkv13.pdf?sc_lang=en-gb"
+    }
+  ]
+}
