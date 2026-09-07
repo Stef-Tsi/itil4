@@ -1,0 +1,78 @@
+name: Force English gameplay
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Patch all gameplay modes to English
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('play.html')
+          s=p.read_text(encoding='utf-8')
+          if 'ALL_GAME_MODES_ENGLISH' in s:
+              print('Already patched')
+              raise SystemExit(0)
+          replacements = {
+            'function weakQuestions(count=10){\n const scored=D.questions.map(q=>{':
+            'function weakQuestions(count=10,source=D.questions){\n const scored=source.map(q=>{',
+            'if(mode==="quick"){qs=pickByBlueprint(QUICK5);title="5-minuten interventie";hearts=3}':
+            'if(mode==="quick"){qs=pickByBlueprint(QUICK5,EN_QUESTIONS);title="5-minuten interventie";hearts=3}',
+            'if(mode==="shift"){qs=pickByBlueprint(SHIFT10);title="Volledige shift";hearts=5}':
+            'if(mode==="shift"){qs=pickByBlueprint(SHIFT10,EN_QUESTIONS);title="Volledige shift";hearts=5}',
+            'if(mode==="weak"){qs=weakQuestions(10);title="Repair Queue";hearts=5}':
+            'if(mode==="weak"){qs=weakQuestions(10,EN_QUESTIONS);title="Repair Queue";hearts=5}',
+            'if(mode==="district"){qs=shuffle(D.questions.filter(q=>q.lo===lo)).slice(0,8);title=D.learningOutcomes[lo].title;hearts=4}':
+            'if(mode==="district"){qs=shuffle(EN_QUESTIONS.filter(q=>q.lo===lo)).slice(0,8);title=D.learningOutcomes[lo].title;hearts=4}',
+            'if(mode==="boss"){qs=shuffle(D.questions.filter(q=>q.lo==="LO7")).slice(0,17);title="LO7 Boss Rush";hearts=6}':
+            'if(mode==="boss"){qs=shuffle(EN_QUESTIONS.filter(q=>q.lo==="LO7")).slice(0,17);title="LO7 Boss Rush";hearts=6}',
+            '<small>10 vragen volgens de belangrijkste examenonderdelen.</small>':
+            '<small>10 Engelse examenvragen met Nederlandse uitleg na je antwoord.</small>',
+            '<small>De game kiest onderwerpen waarop jij fouten maakt.</small>':
+            '<small>Adaptieve Engelse vragen op je zwakke onderwerpen.</small>',
+            '<small>17 vragen over de zeven zwaarst getoetste practices.</small>':
+            '<small>17 Engelse vragen over de zwaarst getoetste practices.</small>'
+          }
+          for old,new in replacements.items():
+              if old not in s:
+                  raise SystemExit('Expected source not found: '+old[:80])
+              s=s.replace(old,new,1)
+          s=s.replace('</script>','// ALL_GAME_MODES_ENGLISH\n</script>',1)
+          p.write_text(s,encoding='utf-8')
+          print('Patched all gameplay modes to EN question bank')
+          PY
+          grep -q 'ALL_GAME_MODES_ENGLISH' play.html
+          grep -q 'pickByBlueprint(QUICK5,EN_QUESTIONS)' play.html
+          grep -q 'weakQuestions(10,EN_QUESTIONS)' play.html
+          grep -q 'EN_QUESTIONS.filter(q=>q.lo===lo)' play.html
+      - name: Validate JS
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import re
+          s=open('play.html',encoding='utf-8').read()
+          parts=re.findall(r'<script(?: [^>]*)?>(.*?)</script>',s,re.S)
+          open('/tmp/check.js','w',encoding='utf-8').write('\n'.join(x for x in parts if not x.lstrip().startswith('{')))
+          PY
+          node --check /tmp/check.js
+      - name: Commit
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add play.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Use English questions in every gameplay mode [skip ci]"
+            git push
+          fi
