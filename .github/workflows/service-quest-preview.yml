@@ -1,0 +1,151 @@
+name: Service Quest preview and browser checks
+
+on:
+  push:
+    branches: [preview-service-quest]
+    paths:
+      - 'service-quest/**'
+      - '.github/workflows/service-quest-preview.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: service-quest-preview
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - name: Checkout preview branch
+        uses: actions/checkout@v6
+
+      - name: Prepare separate static preview
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import shutil, json, subprocess
+          source=Path('service-quest')
+          target=Path('service-quest-preview')
+          assert source.joinpath('index.html').is_file(), 'Service Quest export missing'
+          if target.exists():
+              shutil.rmtree(target)
+          shutil.copytree(source,target)
+          old='/itil4/service-quest'
+          new='/Stef-Tsi/itil4/preview-service-quest/service-quest-preview'
+          changes=[]
+          for path in sorted(target.rglob('*')):
+              if not path.is_file() or path.suffix not in {'.html','.js','.css','.json','.rsc','.svg','.txt'}:
+                  continue
+              original=path.read_text(encoding='utf-8')
+              result=original.replace(old,new)
+              if result != original:
+                  path.write_text(result,encoding='utf-8')
+                  changes.append(str(path))
+          # No changes to the original export or to the main branch.
+          assert subprocess.check_output(['git','diff','--','service-quest']) == b''
+          print('PREVIEW_PATHS_UPDATED', json.dumps(changes))
+          mount=Path('/tmp/service-quest-web') / new.lstrip('/')
+          mount.parent.mkdir(parents=True,exist_ok=True)
+          mount.symlink_to(target.resolve(),target_is_directory=True)
+          Path('/tmp/service-quest-base.txt').write_text(new)
+          PY
+
+      - name: Install browser test tools
+        run: |
+          python3 -m pip install --quiet playwright==1.55.0
+          python3 -m playwright install --with-deps chromium webkit
+
+      - name: Prepare browser smoke test
+        shell: bash
+        run: |
+          cat > /tmp/test-service-quest.py <<'PY'
+          import json, sys, re
+          from playwright.sync_api import sync_playwright
+          url=sys.argv[1]
+          reports=[]
+          with sync_playwright() as p:
+              for name in ('chromium','webkit'):
+                  browser=getattr(p,name).launch()
+                  context=browser.new_context(viewport={'width':430,'height':932},device_scale_factor=3,is_mobile=True,has_touch=True)
+                  page=context.new_page()
+                  errors=[]
+                  failed=[]
+                  page.on('pageerror',lambda e: errors.append(str(e)))
+                  page.on('response',lambda r: failed.append({'status':r.status,'url':r.url}) if r.status >= 400 else None)
+                  report={'browser':name,'url':url,'viewport':'430x932','errors':errors,'failedResponses':failed}
+                  try:
+                      response=page.goto(url,wait_until='networkidle',timeout=90000)
+                      report['status']=response.status
+                      page.wait_for_timeout(1800)
+                      report['title']=page.title()
+                      report['headings']=page.locator('h1,h2,h3').all_text_contents()
+                      report['buttons']=page.get_by_role('button').all_text_contents()
+                      report['bodyExcerpt']=page.locator('body').inner_text()[:5500]
+                      report['horizontalOverflow']=page.evaluate('document.documentElement.scrollWidth > window.innerWidth + 2')
+                      # Opening and closing a settings dialog proves hydration and click handling work.
+                      voice=page.get_by_role('button',name='Voice settings',exact=True)
+                      if voice.count():
+                          voice.click()
+                          page.wait_for_timeout(600)
+                          report['voiceDialogOpened']=page.get_by_role('dialog').count() > 0
+                          report['dialogText']=page.get_by_role('dialog').inner_text()[:3500] if report['voiceDialogOpened'] else ''
+                          page.keyboard.press('Escape')
+                          page.wait_for_timeout(300)
+                      assert response.status == 200, 'Non-200 home page'
+                      assert 'Service Quest' in report['title'], 'Unexpected page'
+                      assert report.get('voiceDialogOpened'), 'Game controls did not become interactive'
+                      assert not errors, 'Uncaught JavaScript errors: '+json.dumps(errors)
+                      assert not failed, 'Missing assets or failed network requests: '+json.dumps(failed)
+                      assert not report['horizontalOverflow'], 'Page overflows mobile viewport'
+                      report['passed']=True
+                  except Exception as exc:
+                      report['passed']=False
+                      report['failure']=str(exc)
+                  finally:
+                      reports.append(report)
+                      context.close()
+                      browser.close()
+          print('BROWSER_REPORT_START')
+          print(json.dumps(reports,ensure_ascii=False,indent=2))
+          print('BROWSER_REPORT_END')
+          open('/tmp/browser-report.json','w').write(json.dumps(reports,ensure_ascii=False,indent=2))
+          sys.exit(0 if all(r.get('passed') for r in reports) else 1)
+          PY
+
+      - name: Test local preview on mobile Chromium and WebKit
+        shell: bash
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory /tmp/service-quest-web >/tmp/service-quest-server.log 2>&1 &
+          sleep 1
+          BASE=$(cat /tmp/service-quest-base.txt)
+          python3 /tmp/test-service-quest.py "http://127.0.0.1:8765${BASE}/index.html"
+          cp /tmp/browser-report.json service-quest-preview/local-browser-report.json
+
+      - name: Publish tested preview on separate branch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add service-quest-preview
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish tested Service Quest preview [skip ci]"
+            git push origin HEAD:preview-service-quest
+          fi
+
+      - name: Verify actual public preview link
+        shell: bash
+        run: |
+          URL='https://raw.githack.com/Stef-Tsi/itil4/preview-service-quest/service-quest-preview/index.html'
+          python3 /tmp/test-service-quest.py "$URL"
+          cp /tmp/browser-report.json service-quest-preview/live-browser-report.json
+          git add service-quest-preview/live-browser-report.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Record live mobile browser test results [skip ci]"
+            git push origin HEAD:preview-service-quest
+          fi
+          echo "LIVE_PREVIEW_VERIFIED=$URL"
