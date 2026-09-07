@@ -1,0 +1,21 @@
+name: Training source snapshot
+on:
+  push:
+    branches: [service-quest-training]
+    paths: ['.github/workflows/training-snapshot.yml']
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/upload-artifact@v4
+        with:
+          name: service-quest-source
+          path: |
+            service-quest/**
+            service-quest-preview/**
+          retention-days: 1
+          if-no-files-found: error
