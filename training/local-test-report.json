@@ -6,17 +6,20 @@
     "checks": [
       "Application loaded: 446 question cards and 78 matching concepts",
       "Mission launcher, all 7 topic filters and 10/20/30 lengths",
+      "Placed terms have bright chips, solid blue borders, placement numbers, and no premature correctness clues",
+      "Wrong connections and chosen terms are red; correct terms green; explanations neutral; graded answers stay fully readable and no term bank covers feedback",
       "4 statements / 6 terms; wrong answers show specific Dutch explanations",
-      "Pointer drag, tap-to-match and scoring",
+      "Pointer drag, tap-to-match, moving an assigned term, and green correct-answer feedback",
       "Training save and unfinished mission restored after reload",
       "Completed 20-task mixed mission: 13 multiple-choice + 7 matching / 41 checks",
-      "Learn-first route and Utility scenario checkpoint",
+      "Learn-first route and Utility scenario checkpoint; multiple-choice errors also have red/green feedback",
       "Original Exam arena available; no horizontal overflow or JavaScript errors"
     ],
     "errors": [],
     "failedResponses": [],
     "questionCount": 446,
     "conceptCount": 78,
+    "uiVersion": "matching-visibility-2",
     "passed": true
   },
   {
@@ -26,17 +29,20 @@
     "checks": [
       "Application loaded: 446 question cards and 78 matching concepts",
       "Mission launcher, all 7 topic filters and 10/20/30 lengths",
+      "Placed terms have bright chips, solid blue borders, placement numbers, and no premature correctness clues",
+      "Wrong connections and chosen terms are red; correct terms green; explanations neutral; graded answers stay fully readable and no term bank covers feedback",
       "4 statements / 6 terms; wrong answers show specific Dutch explanations",
-      "Pointer drag, tap-to-match and scoring",
+      "Pointer drag, tap-to-match, moving an assigned term, and green correct-answer feedback",
       "Training save and unfinished mission restored after reload",
       "Completed 20-task mixed mission: 13 multiple-choice + 7 matching / 41 checks",
-      "Learn-first route and Utility scenario checkpoint",
+      "Learn-first route and Utility scenario checkpoint; multiple-choice errors also have red/green feedback",
       "Original Exam arena available; no horizontal overflow or JavaScript errors"
     ],
     "errors": [],
     "failedResponses": [],
     "questionCount": 446,
     "conceptCount": 78,
+    "uiVersion": "matching-visibility-2",
     "passed": true
   }
 ]
