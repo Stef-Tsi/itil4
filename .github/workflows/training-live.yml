@@ -47,13 +47,16 @@ jobs:
           fi
       - name: Test the actual live link
         run: |
-          TEST_ENGINES=chromium,webkit python3 training-src/test_live.py 'https://raw.githack.com/Stef-Tsi/itil4/service-quest-training/training/index.html'
+          PUBLISHED_SHA=$(git rev-parse HEAD)
+          URL="https://raw.githack.com/Stef-Tsi/itil4/${PUBLISHED_SHA}/training/index.html"
+          TEST_ENGINES=chromium,webkit python3 training-src/test_live.py "$URL"
           cp test-results/report.json training/live-test-report.json
           git add training/live-test-report.json
           if ! git diff --cached --quiet; then
             git commit -m 'Record successful live mobile training tests [skip ci]'
             git push origin HEAD:service-quest-training
           fi
+          echo "VERIFIED_LIVE_URL=$URL"
       - name: Save diagnostic reports and screenshots
         if: always()
         uses: actions/upload-artifact@v4
