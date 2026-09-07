@@ -1,0 +1,24 @@
+name: Question audit source
+on:
+  push:
+    branches: [service-quest-training]
+    paths: ['.github/workflows/content-audit-source.yml']
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/upload-artifact@v4
+        with:
+          name: question-audit-source
+          path: |
+            training-src/
+            training/
+            service-quest/
+            .github/workflows/training-live.yml
+          include-hidden-files: true
+          retention-days: 1
+          if-no-files-found: error
