@@ -15,7 +15,9 @@ jobs:
   publish:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
+    env:
+      BROWSER_IMAGE: mcr.microsoft.com/playwright/python:v1.59.0-noble
     steps:
       - uses: actions/checkout@v6
       - name: Build and validate one coherent release
@@ -27,10 +29,9 @@ jobs:
           python3 quality-src/release.py
           RELEASE=$(python3 -c "import json;print(json.load(open('training/release.json'))['directory'])")
           echo "RELEASE=$RELEASE" >> "$GITHUB_ENV"
-      - name: Install test browsers
-        run: |
-          python3 -m pip install --quiet playwright==1.55.0
-          python3 -m playwright install --with-deps chromium webkit
+      - name: Fetch official preinstalled Chromium and WebKit image
+        timeout-minutes: 5
+        run: docker pull "$BROWSER_IMAGE"
       - name: Start local preview with release asset paths
         run: |
           mkdir -p /tmp/sq-web/Stef-Tsi/itil4/service-quest-training
@@ -39,7 +40,8 @@ jobs:
           sleep 1
       - name: Test families, curated exams, mobile controls and saved progress
         run: |
-          TEST_ENGINES=chromium,webkit python3 quality-src/test_quality.py "http://127.0.0.1:8765/Stef-Tsi/itil4/service-quest-training/$RELEASE/index.html"
+          URL="http://127.0.0.1:8765/Stef-Tsi/itil4/service-quest-training/$RELEASE/index.html"
+          docker run --rm --ipc=host --network host -v "$GITHUB_WORKSPACE:/work" -w /work "$BROWSER_IMAGE" bash -lc 'python3 -m pip install --quiet playwright==1.59.0 && TEST_ENGINES=chromium,webkit python3 quality-src/test_quality.py "$1"' bash "$URL"
           cp test-results/quality-report.json training/local-quality-test-report.json
           cp test-results/quality-report.json "$RELEASE/local-quality-test-report.json"
       - name: Publish all tested assets together
@@ -55,7 +57,7 @@ jobs:
         run: |
           PUBLISHED_SHA=$(git rev-parse HEAD)
           URL="https://raw.githack.com/Stef-Tsi/itil4/${PUBLISHED_SHA}/${RELEASE}/index.html"
-          TEST_ENGINES=chromium,webkit python3 quality-src/test_quality.py "$URL"
+          docker run --rm --ipc=host --network host -v "$GITHUB_WORKSPACE:/work" -w /work "$BROWSER_IMAGE" bash -lc 'python3 -m pip install --quiet playwright==1.59.0 && TEST_ENGINES=chromium,webkit python3 quality-src/test_quality.py "$1"' bash "$URL"
           cp test-results/quality-report.json training/live-quality-test-report.json
           cp test-results/quality-report.json "$RELEASE/live-quality-test-report.json"
           git add training/live-quality-test-report.json "$RELEASE/live-quality-test-report.json"
