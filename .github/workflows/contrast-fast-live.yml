@@ -1,0 +1,72 @@
+name: Verify and publish contrast release with installed Chrome
+on:
+  push:
+    branches: [service-quest-training]
+    paths: ['.github/workflows/contrast-fast-live.yml']
+permissions:
+  contents: write
+concurrency:
+  group: service-quest-training-live
+  cancel-in-progress: true
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build validated contrast release
+        run: |
+          python3 training-src/build_live.py
+          python3 quality-src/build.py
+          python3 quality-src/release.py
+          node --check training/training.js
+          RELEASE=$(python3 -c "import json;print(json.load(open('training/release.json'))['directory'])")
+          echo "RELEASE=$RELEASE" >> "$GITHUB_ENV"
+      - name: Use the preinstalled browser without downloading system packages
+        run: |
+          CHROME=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)
+          test -n "$CHROME"
+          "$CHROME" --version
+          echo "CHROMIUM_PATH=$CHROME" >> "$GITHUB_ENV"
+          python3 -m pip install --quiet playwright==1.55.0
+      - name: Serve and test release locally
+        run: |
+          mkdir -p /tmp/sq-web/Stef-Tsi/itil4/service-quest-training
+          ln -s "$GITHUB_WORKSPACE/$RELEASE" "/tmp/sq-web/Stef-Tsi/itil4/service-quest-training/$RELEASE"
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory /tmp/sq-web >/tmp/sq-server.log 2>&1 &
+          sleep 1
+          TEST_ENGINES=chromium python3 quality-src/test_quality.py "http://127.0.0.1:8765/Stef-Tsi/itil4/service-quest-training/$RELEASE/index.html"
+          cp test-results/quality-report.json training/local-quality-test-report.json
+          cp test-results/quality-report.json "$RELEASE/local-quality-test-report.json"
+      - name: Publish coherent static release
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add training "$RELEASE"
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish tested coherent contrast release [skip ci]'
+            git push origin HEAD:service-quest-training
+          fi
+          echo "PUBLISHED_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Verify real public release and record the exact link
+        run: |
+          URL="https://raw.githack.com/Stef-Tsi/itil4/${PUBLISHED_SHA}/${RELEASE}/index.html"
+          TEST_ENGINES=chromium python3 quality-src/test_quality.py "$URL"
+          cp test-results/quality-report.json training/live-quality-test-report.json
+          cp test-results/quality-report.json "$RELEASE/live-quality-test-report.json"
+          printf '%s\n' "$URL" > training/VERIFIED-LIVE-URL.txt
+          git add training/live-quality-test-report.json training/VERIFIED-LIVE-URL.txt "$RELEASE/live-quality-test-report.json"
+          git commit -m 'Record successful public contrast release verification [skip ci]'
+          git push origin HEAD:service-quest-training
+          echo "VERIFIED_LIVE_URL=$URL"
+      - name: Preserve diagnostic reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contrast-fast-browser-tests
+          path: |
+            test-results/
+            training/release.json
+            training/quality-audit.json
+          retention-days: 3
+          if-no-files-found: warn
