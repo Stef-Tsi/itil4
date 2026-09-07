@@ -18,48 +18,53 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v6
-      - name: Build coherent matching and validate both question pools
+      - name: Build and validate one coherent release
         run: |
           python3 training-src/build_live.py
           python3 quality-src/build.py
           node --check training/training.js
           node --check training/_next/static/chunks/game-DXb1F_Z4.js
+          python3 quality-src/release.py
+          RELEASE=$(python3 -c "import json;print(json.load(open('training/release.json'))['directory'])")
+          echo "RELEASE=$RELEASE" >> "$GITHUB_ENV"
       - name: Install test browsers
         run: |
           python3 -m pip install --quiet playwright==1.55.0
           python3 -m playwright install --with-deps chromium webkit
-      - name: Start local preview with production asset paths
+      - name: Start local preview with release asset paths
         run: |
           mkdir -p /tmp/sq-web/Stef-Tsi/itil4/service-quest-training
-          ln -s "$GITHUB_WORKSPACE/training" /tmp/sq-web/Stef-Tsi/itil4/service-quest-training/training
+          ln -s "$GITHUB_WORKSPACE/$RELEASE" "/tmp/sq-web/Stef-Tsi/itil4/service-quest-training/$RELEASE"
           python3 -m http.server 8765 --bind 127.0.0.1 --directory /tmp/sq-web >/tmp/sq-server.log 2>&1 &
           sleep 1
-      - name: Test coherent families, exam pool, mobile controls and saved progress
+      - name: Test families, curated exams, mobile controls and saved progress
         run: |
-          TEST_ENGINES=chromium,webkit python3 quality-src/test_quality.py 'http://127.0.0.1:8765/Stef-Tsi/itil4/service-quest-training/training/index.html'
+          TEST_ENGINES=chromium,webkit python3 quality-src/test_quality.py "http://127.0.0.1:8765/Stef-Tsi/itil4/service-quest-training/$RELEASE/index.html"
           cp test-results/quality-report.json training/local-quality-test-report.json
-      - name: Publish tested uncompressed site on training branch
+          cp test-results/quality-report.json "$RELEASE/local-quality-test-report.json"
+      - name: Publish all tested assets together
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add training
+          git add training "$RELEASE"
           if ! git diff --cached --quiet; then
-            git commit -m 'Publish coherent matching and curated contrast questions [skip ci]'
+            git commit -m 'Publish cache-isolated coherent contrast edition [skip ci]'
             git push origin HEAD:service-quest-training
           fi
-      - name: Verify actual public link on mobile Chromium and WebKit
+      - name: Verify actual public release on mobile Chromium and WebKit
         run: |
           PUBLISHED_SHA=$(git rev-parse HEAD)
-          URL="https://raw.githack.com/Stef-Tsi/itil4/${PUBLISHED_SHA}/training/index.html"
+          URL="https://raw.githack.com/Stef-Tsi/itil4/${PUBLISHED_SHA}/${RELEASE}/index.html"
           TEST_ENGINES=chromium,webkit python3 quality-src/test_quality.py "$URL"
           cp test-results/quality-report.json training/live-quality-test-report.json
-          git add training/live-quality-test-report.json
+          cp test-results/quality-report.json "$RELEASE/live-quality-test-report.json"
+          git add training/live-quality-test-report.json "$RELEASE/live-quality-test-report.json"
           if ! git diff --cached --quiet; then
-            git commit -m 'Record verified public contrast edition tests [skip ci]'
+            git commit -m 'Record verified public contrast release tests [skip ci]'
             git push origin HEAD:service-quest-training
           fi
           echo "VERIFIED_LIVE_URL=$URL"
-      - name: Save reports, screenshots and build diagnostic sources
+      - name: Save reports, screenshots and diagnostic sources
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -67,6 +72,7 @@ jobs:
           path: |
             test-results/
             training/quality-audit.json
+            training/release.json
             quality-src/build.py
             quality-src/runtime.js
             training/training.js
