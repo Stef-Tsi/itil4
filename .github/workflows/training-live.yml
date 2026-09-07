@@ -1,0 +1,64 @@
+name: Publish verified training edition
+on:
+  push:
+    branches: [service-quest-training]
+    paths:
+      - 'training-src/**'
+      - '.github/workflows/training-live.yml'
+permissions:
+  contents: write
+concurrency:
+  group: service-quest-training-live
+  cancel-in-progress: true
+jobs:
+  publish:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build training page and validate data
+        run: |
+          python3 training-src/build_live.py
+          node --check training/training.js
+          node --check training/_next/static/chunks/game-DXb1F_Z4.js
+      - name: Install test browsers
+        run: |
+          python3 -m pip install --quiet playwright==1.55.0
+          python3 -m playwright install --with-deps chromium webkit
+      - name: Start local preview with production asset paths
+        run: |
+          mkdir -p /tmp/sq-web/Stef-Tsi/itil4/service-quest-training
+          ln -s "$GITHUB_WORKSPACE/training" /tmp/sq-web/Stef-Tsi/itil4/service-quest-training/training
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory /tmp/sq-web >/tmp/sq-server.log 2>&1 &
+          sleep 1
+      - name: Test mobile matching and missions before publishing
+        run: |
+          TEST_ENGINES=chromium,webkit python3 training-src/test_live.py 'http://127.0.0.1:8765/Stef-Tsi/itil4/service-quest-training/training/index.html'
+          cp test-results/report.json training/local-test-report.json
+      - name: Publish uncompressed site on training branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add training
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish mobile-tested Service Quest training edition [skip ci]'
+            git push origin HEAD:service-quest-training
+          fi
+      - name: Test the actual live link
+        run: |
+          TEST_ENGINES=chromium,webkit python3 training-src/test_live.py 'https://raw.githack.com/Stef-Tsi/itil4/service-quest-training/training/index.html'
+          cp test-results/report.json training/live-test-report.json
+          git add training/live-test-report.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record successful live mobile training tests [skip ci]'
+            git push origin HEAD:service-quest-training
+          fi
+      - name: Save diagnostic reports and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: training-browser-tests
+          path: test-results/
+          retention-days: 3
+          if-no-files-found: warn
