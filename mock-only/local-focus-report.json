@@ -1,0 +1,21 @@
+[
+  {
+    "url": "http://127.0.0.1:8765/mock-only/index.html",
+    "engine": "chromium",
+    "viewport": "430x932",
+    "checks": [
+      "157 existing contrast questions loaded; default focus length is three",
+      "200 complete papers validated; custom 1/3/5/7/10/20/40 blocks unique; English/NL help available for every question",
+      "Focus is untimed; no spoilers before checking; wrong/correct colours, English explanations, expanded tips and optional Dutch help",
+      "Completed three-question block, paused/resumed in same tab, reviewed errors, next block prioritises unseen questions",
+      "Custom seven-question practices-only block completes at exactly seven with no pass/fail claim",
+      "Full mock: 40 questions, 60-minute deadline, no early help, change/clear/flag/navigation, unanswered score zero and seven-topic result",
+      "Timer catches elapsed wall-clock time and automatically submits selected/unanswered answers correctly",
+      "No horizontal overflow at 375/430px; no uncaught JavaScript or missing-resource errors"
+    ],
+    "errors": [],
+    "failedResponses": [],
+    "version": "focus-1.0",
+    "passed": true
+  }
+]
