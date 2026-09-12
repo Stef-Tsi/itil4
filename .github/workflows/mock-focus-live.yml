@@ -1,0 +1,84 @@
+name: Publish tested Focus and Mock
+on:
+  push:
+    branches: [service-quest-training]
+    paths:
+      - 'mock-only/focus*'
+      - 'mock-only/test_focus.py'
+      - '.github/workflows/mock-focus-live.yml'
+permissions:
+  contents: write
+concurrency:
+  group: mock-focus-live
+  cancel-in-progress: true
+jobs:
+  publish:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build self-contained mock entry and data
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          source=Path('contrast-7a6578f09d591d/training-data.js').read_text(encoding='utf-8')
+          data=json.loads(source.split('=',1)[1].rstrip(';\n'))
+          questions=data['strictQuestions']
+          assert len(questions)==157
+          assert len({q['id'] for q in questions})==157
+          for q in questions:
+              assert len(q['options'])==len(set(q['options']))==4
+              assert q['why'] and q['whyNl'] and q['hook']
+          bank={'version':'coherent-contrast-1','questions':questions}
+          Path('mock-only/mock-data.js').write_text('window.MOCK_DATA='+json.dumps(bank,ensure_ascii=False,separators=(',',':'))+';\n',encoding='utf-8')
+          Path('mock-only/index.html').write_text(Path('mock-only/focus.html').read_text(encoding='utf-8'),encoding='utf-8')
+          PY
+          node --check mock-only/focus.js
+          node --check mock-only/focus-tips.js
+          node --check mock-only/mock-data.js
+      - name: Use installed Chrome for browser checks
+        run: |
+          python3 -m pip install --quiet playwright==1.55.0
+          echo "CHROME_BIN=$(command -v google-chrome || command -v chromium)" >> "$GITHUB_ENV"
+      - name: Test actual served files before publishing
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/focus-server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          sleep 1
+          REPORT_DIR=test-results/local python3 mock-only/test_focus.py 'http://127.0.0.1:8765/mock-only/index.html'
+          cp test-results/local/focus-report.json mock-only/local-focus-report.json
+      - name: Publish tested focus entry point
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add mock-only/index.html mock-only/mock-data.js mock-only/local-focus-report.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish tested Focus and Mock edition [skip ci]'
+            git push origin HEAD:service-quest-training
+          fi
+          echo "PUBLISHED_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Verify the actual public link
+        run: |
+          URL="https://raw.githack.com/Stef-Tsi/itil4/${PUBLISHED_SHA}/mock-only/index.html"
+          REPORT_DIR=test-results/live python3 mock-only/test_focus.py "$URL"
+          cp test-results/live/focus-report.json mock-only/live-focus-report.json
+          git add mock-only/live-focus-report.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record successful public Focus and Mock checks [skip ci]'
+            git push origin HEAD:service-quest-training
+          fi
+          echo "VERIFIED_LIVE_URL=$URL"
+      - name: Preserve test reports and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: focus-browser-checks
+          path: |
+            test-results/
+            mock-only/focus.js
+            mock-only/focus-tips.js
+          retention-days: 3
+          if-no-files-found: warn
