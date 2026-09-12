@@ -1,0 +1,22 @@
+name: Focus mode source snapshot
+on:
+  push:
+    branches: [service-quest-training]
+    paths: ['.github/workflows/focus-source-snapshot.yml']
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/upload-artifact@v4
+        with:
+          name: focus-source
+          path: |
+            mock-only/**
+            contrast-7a6578f09d591d/training-data.js
+            contrast-7a6578f09d591d/quality-audit.json
+          retention-days: 1
+          if-no-files-found: error
