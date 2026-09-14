@@ -1,0 +1,85 @@
+from pathlib import Path
+import json,re,random,collections,html,hashlib
+
+ROOT=Path(__file__).resolve().parent.parent
+SRC=ROOT/'contrast-7a6578f09d591d'/'training-data.js'
+s=SRC.read_text(encoding='utf-8')
+data=json.loads(re.match(r'window\.SQ_TRAINING_DATA=(.*);\s*$',s,re.S).group(1))
+concepts=data['concepts']
+C={c['id']:c for c in concepts}
+base=[dict(q) for q in data['strictQuestions']]
+
+TARGET={'1.1':20,'1.2':20,'1.3':14,'2.1':12,'2.2':50,'3.1':20,'4.1':12,'5.1':12,'5.2':16,'6.1':60,'6.2':24,'7.1':172}
+BLUEPRINT={'1.1':2,'1.2':2,'1.3':1,'2.1':1,'2.2':5,'3.1':2,'4.1':1,'5.1':1,'5.2':1,'6.1':5,'6.2':2,'7.1':17}
+BL1={'1.1','6.1','6.2'}
+
+# Related concept fallback groups. Keep distractors close to the tested idea.
+GROUPS={
+'1.1':['service','service-management','utility','warranty','customer','user','sponsor'],
+'1.2':['output','outcome','value','cost','risk','utility','warranty'],
+'1.3':['provider','offering','provision','consumption','relationship'],
+'2.2':['focus-value','start-current','iterate','visibility','holistic','simple','optimize'],
+'3.1':['people','technology','partners','streams'],
+'4.1':['svs','governance','practice','value-chain','improvement-practice'],
+'5.2':['plan','improve','engage','design','obtain','deliver'],
+'6.1':['security-practice','relationship-practice','supplier-practice','asset-practice','monitor-practice','release-practice','config-practice','deploy-practice','improvement-practice','change-practice','incident-practice','problem-practice','request-practice','desk-practice','level-practice'],
+'6.2':['asset','event','ci','change','incident','problem','known-error'],
+'7.1':['request','workaround','standard','normal','emergency','authority','vision','now','want','how','action','did','momentum','register','sla',
+       'improvement-practice','change-practice','incident-practice','problem-practice','request-practice','desk-practice','level-practice']
+}
+DEEP_PRACTICES=['improvement-practice','change-practice','incident-practice','problem-practice','request-practice','desk-practice','level-practice']
+
+# English descriptions for deeper LO7 scenarios beyond simple purpose recall.
+DEEP_CLUES={
+'improvement-practice':[
+ 'A team repeatedly checks where its services and practices could better support changing business needs and records opportunities for action.',
+ 'Improvement work is treated as an ongoing responsibility rather than a one-off project owned by a specialist team.',
+ 'A team uses a structured model to move from a shared vision and baseline to action, evaluation and sustained momentum.'
+],
+'change-practice':[
+ 'A proposed modification is assessed for risk and then sent to the appropriate authority before implementation is scheduled.',
+ 'Different change models use different authorities, and the schedule is used to help avoid conflicts between planned changes.',
+ 'The organization aims to increase the number of successful service changes while balancing risk and speed.'
+],
+'incident-practice':[
+ 'A user-facing service is degraded, so the immediate priority is to restore normal operation and reduce business impact.',
+ 'A support team applies a temporary workaround so users can resume work before the underlying cause is removed.',
+ 'Several specialists collaborate quickly on a high-impact interruption instead of waiting for one tier to finish before involving the next.'
+],
+'problem-practice':[
+ 'Repeated incidents are analysed to identify and control their underlying or potential causes.',
+ 'An analysed but unresolved defect is documented so future incidents can be diagnosed and managed more effectively.',
+ 'Trend analysis is used proactively to identify conditions that could cause incidents before a major interruption occurs.'
+],
+'request-practice':[
+ 'A user asks for a predefined service action that belongs to normal service delivery and follows an agreed fulfilment workflow.',
+ 'A routine access request may still require an approval step even though it is not an incident or a normal change.',
+ 'Frequently requested service actions are standardized and automated where appropriate to make fulfilment effective and user-friendly.'
+],
+'desk-practice':[
+ 'Users need one clear entry point for incidents and service requests, with useful communication throughout the interaction.',
+ 'A support contact listens to the user, captures context and coordinates with a specialist team rather than personally fixing every technical issue.',
+ 'The quality of the user interaction depends on communication and empathy as well as technical knowledge.'
+],
+'level-practice':[
+ 'A provider agrees business-based targets with a customer and reviews whether the end-to-end service is meeting them.',
+ 'Technical component metrics look healthy, but users report poor service; the team therefore adds measures that reflect user experience.',
+ 'Targets and measures are expressed in terms meaningful to the customer rather than only in infrastructure statistics.'
+]
+}
+
+# Additional accurate detail cues for specific LO7 terms.
+TERM_CLUES={
+'request':['The user initiates an agreed, predefined service action and no service failure has occurred.','The demand belongs to normal service delivery and follows a known request model.'],
+'workaround':['The action reduces the impact of an incident or problem without removing the underlying cause.','Service can continue using an alternative method while a complete resolution is still unavailable.'],
+'standard':['The change is low-risk, well understood, documented and already authorized under an agreed model.','No new authorization is needed each time because the approved procedure is followed exactly.'],
+'normal':['The change is not covered by a pre-authorized model and therefore needs assessment and authorization appropriate to its risk.','The proposed modification is planned through the normal change process rather than an expedited emergency path.'],
+'emergency':['The change must be implemented as soon as possible, but still receives expedited assessment and authorization.','Urgency shortens the route; it does not mean that authorization can simply be ignored.'],
+'authority':['The person or group is empowered to authorize a particular type of change or change model.','Different types of change can have different people or groups empowered to approve them.'],
+'vision':['The improvement team links the proposed work to the organization’s direction, mission and objectives.'],
+'now':['The team establishes a factual baseline of current performance before choosing a target.'],
+'want':['The team defines a measurable future state that will count as successful improvement.'],
+'how':['The target exists; the team now chooses the actions, resources and route needed to reach it.'],
+'action':['The agreed improvement plan is now being carried out.'],
+'did':['Actual results are compared with the target to determine whether the improvement achieved what was intended.'],
+'momentum':['Learning is embedded, successful changes are reinforced and further improvement 
