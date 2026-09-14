@@ -1,0 +1,89 @@
+      ("A manager says one guiding principle should be selected as the rule for the whole project. What is the BEST response?",["Several principles can be relevant together; use the ones that fit the context","Correct: one principle must govern each project","Correct, but only if that principle is Focus on value","A principle should be selected only after every practice is implemented"]),
+      ("What is the MAIN purpose of the guiding principles?",["To provide recommendations that guide decisions and actions in many circumstances","To define a mandatory process architecture for every organization","To assign each ITIL practice to one value chain activity","To replace governance with team-level rules"]),
+      ("Which statement BEST explains why two teams may apply the same guiding principle differently?",["The principle is applied in context rather than as a rigid procedure","Each team is expected to rewrite the official principle","The principles apply only where no practice exists","The correct application depends only on team size"]),
+      ("Which statement is CORRECT about applying guiding principles during improvement?",["More than one principle may influence the same improvement decision","A principle becomes invalid once feedback is collected","Guiding principles are used only during planning","Each improvement step has one exclusive guiding principle"]),
+    ]
+    for p,opts in variants:
+        add(dict(id=qid('2.1'),criterion='2.1',lo=2,tag='Using guiding principles',prompt=p,options=opts,
+                 why='Guiding principles are universal recommendations that interact and are adapted to the situation rather than rigid procedures or exclusive stages.',
+                 whyNl='Guiding principles zijn samenhangende aanbevelingen. Je past meerdere relevante principes toe op de context; het zijn geen vaste procedures of exclusieve fasen.',
+                 hook='Use relevant principles together, in context.',kind='standard'))
+def add_51_variants():
+    variants=[
+      ("Which description of the service value chain is MOST accurate?",["An interconnected set of six activities that organizations combine into value streams","A linear lifecycle that begins with Plan and always ends with Improve","A catalogue of the 34 ITIL practices","A governance method for approving service budgets"]),
+      ("What is the PRIMARY reason the value chain can support different value streams?",["Its activities can be combined in different patterns to respond to different demand","Every activity has a fixed sequence that simplifies all services","Each practice can be used in only one activity","Only one value stream can exist for each service"]),
+      ("A value stream omits one value chain activity because it is not needed for that scenario. Which statement is BEST?",["This can be valid because value streams use the activities needed for the specific situation","The value stream is invalid because every activity is mandatory exactly once","The omitted activity must be replaced by a management practice","Only Engage may ever be omitted"]),
+      ("Which statement BEST explains the relationship between demand and the service value chain?",["Demand can trigger value chain work that facilitates value creation through suitable value streams","Demand is accepted only by the Plan activity","Demand is converted directly into value without practices or activities","Demand can enter the chain only after all service levels are agreed"]),
+    ]
+    for p,opts in variants:
+        add(dict(id=qid('5.1'),criterion='5.1',lo=5,tag='Service value chain',prompt=p,options=opts,
+                 why='The service value chain is an interconnected, flexible operating model. Different value streams combine the activities as needed to respond to demand and facilitate value creation.',
+                 whyNl='De service value chain is een flexibel en verbonden operating model. Value streams combineren activiteiten naar behoefte; er is geen verplichte lineaire volgorde.',
+                 hook='Flexible chain, specific value streams.',kind='standard'))
+
+while sum(q['criterion']=='2.1' for q in questions)<TARGET['2.1']:
+    before=len(questions); add_21_variants();
+    if len(questions)==before: break
+while sum(q['criterion']=='5.1' for q in questions)<TARGET['5.1']:
+    before=len(questions); add_51_variants();
+    if len(questions)==before: break
+
+# Trim only newly generated overages per criterion; always keep original reviewed base questions.
+base_ids={q['id'] for q in base}
+final=[]
+for crit,target in TARGET.items():
+    qs=[q for q in questions if q['criterion']==crit]
+    base_q=[q for q in qs if q['id'] in base_ids]
+    new_q=[q for q in qs if q['id'] not in base_ids]
+    if len(base_q)>target: raise RuntimeError('base exceeds target '+crit)
+    final.extend(base_q+new_q[:target-len(base_q)])
+questions=final
+
+# Deterministic order in file but runtime shuffles. Put by criterion then id.
+order=list(TARGET)
+questions.sort(key=lambda q:(order.index(q['criterion']),q['id']))
+
+# Validation.
+assert len(questions)==sum(TARGET.values()),(len(questions),sum(TARGET.values()))
+assert len({q['id'] for q in questions})==len(questions)
+assert len({norm(q['prompt']) for q in questions})==len(questions)
+for q in questions:
+    assert len(q['options'])==4 and len(set(q['options']))==4,q['id']
+    assert q['criterion'] in TARGET
+    assert q['lo']==int(q['criterion'][0])
+    assert q['why'] and q['whyNl'] and q['hook']
+counts=collections.Counter(q['criterion'] for q in questions)
+assert dict(counts)==TARGET,(counts,TARGET)
+
+# Ensure there are at least ten fully non-repeating 40-question papers by criterion capacity.
+capacity=min(TARGET[c]//BLUEPRINT[c] for c in BLUEPRINT)
+assert capacity>=10,capacity
+
+# Type / wording audit.
+kinds=collections.Counter(q.get('kind','standard') for q in questions)
+ops=collections.Counter()
+for q in questions:
+    p=' '+q['prompt'].upper()+' '
+    for k in [' BEST ',' NOT ',' MOST ',' PRIMARY ',' MAIN ',' CORRECT ',' COMPLETE THE STATEMENT',' WHICH TWO ']:
+        if k in p: ops[k.strip()]+=1
+
+out={
+ 'version':'mock-calibrated-2026-09-14',
+ 'questions':questions,
+ 'blueprint':BLUEPRINT,
+ 'meta':{
+   'questionCount':len(questions),'countsByCriterion':dict(counts),'nonRepeatingFullMockCapacity':capacity,
+   'kinds':dict(kinds),'wordingOperators':dict(ops),
+   'bloom1Criteria':sorted(BL1),'bloom1MarksPerPaper':sum(BLUEPRINT[c] for c in BL1),'bloom2MarksPerPaper':40-sum(BLUEPRINT[c] for c in BL1)
+ }
+}
+OUT=ROOT/'mock-calibrated-v2'
+import shutil,math
+if OUT.exists(): shutil.rmtree(OUT)
+OUT.mkdir()
+qs=out['questions']; size=math.ceil(len(qs)/6)
+for i in range(6):
+    chunk=qs[i*size:(i+1)*size]
+    (OUT/f'bank-{i+1:02}.js').write_text('window.MOCK_BANK=(window.MOCK_BANK||[]).concat('+json.dumps(chunk,ensure_ascii=False,separators=(',',':'))+');\n',encoding='utf-8')
+meta={k:v for k,v in out.items() if k!='questions'}
+(OUT/'meta.js').write_text('window.MOCK_DATA='+json.dumps(meta,ensure_ascii=Fal
