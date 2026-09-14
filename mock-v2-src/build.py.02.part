@@ -1,0 +1,144 @@
+is encouraged.'],
+'register':['Improvement ideas are captured, assessed and prioritized in one place so they can be managed over time.'],
+'sla':['A provider and customer document required services and expected service levels in an agreement.']
+}
+
+# Fake-but-plausible labels used only as distractors for membership questions.
+FAKES={
+'principle':['Document every activity','Centralize all decisions','Automate before optimizing','Eliminate all variation'],
+'dimension':['Governance and compliance','Customers and users','Products and services','Strategy and portfolio'],
+'svs':['Service catalogue','Project lifecycle','Technology architecture','Incident model'],
+'chain':['Authorize changes','Manage incidents','Control suppliers','Measure availability']
+}
+
+questions=[]
+seen_prompts=set()
+seen_ids=set()
+
+def norm(s): return re.sub(r'\s+',' ',s.strip()).lower()
+
+def add(q):
+    p=norm(q['prompt'])
+    if p in seen_prompts: return False
+    if q['id'] in seen_ids: raise ValueError('duplicate id '+q['id'])
+    if len(q['options'])!=4 or len(set(q['options']))!=4: return False
+    if not all(isinstance(x,str) and x.strip() for x in q['options']): return False
+    q.setdefault('challenge',True); q.setdefault('pool','exam-v2'); q.setdefault('reviewed',True)
+    questions.append(q); seen_prompts.add(p); seen_ids.add(q['id']); return True
+
+for q in base:
+    # Preserve the human-reviewed bank.
+    add(q)
+
+counter=0
+def qid(crit):
+    global counter
+    counter+=1
+    return 'v2-'+crit.replace('.','')+'-'+str(counter).zfill(4)
+
+def related(c,crit=None):
+    # Prefer distractors from the same assessment criterion; then explicit close distractors; then the wider family.
+    ids=[]
+    raw=list(c.get('distractors',[]))
+    for x in raw:
+        if x in C and x!=c['id'] and (not crit or C[x].get('criterion')==crit): ids.append(x)
+    for x in raw:
+        if x in C and x!=c['id'] and x not in ids: ids.append(x)
+    if crit in GROUPS:
+        for x in GROUPS[crit]:
+            if x in C and x!=c['id'] and x not in ids: ids.append(x)
+    return [C[x] for x in ids]
+
+def explain(c, ds):
+    parts=[f"The decisive clue matches {c['term']}: {c['definition']}"]
+    for d in ds[:2]: parts.append(f"{d['term']} instead refers to {d['definition'][0].lower()+d['definition'][1:]}")
+    return ' '.join(parts)
+
+def explain_nl(c,ds):
+    s=c['nl']
+    if ds:
+        s += ' Vergelijk vooral met '+ds[0]['term']+': '+ds[0]['nl']
+    return s
+
+def scenario_stem(c):
+    s=c.get('scenario','').strip()
+    if not s: return c['definition']
+    # Remove final explicit question while preserving the scenario facts.
+    m=re.search(r'\b(Which|What|How)\b[^?]*\?\s*$',s)
+    if m and m.start()>25:
+        stem=s[:m.start()].strip()
+        if stem: return stem
+    if s.startswith(('Which ','What ','How ')):
+        return c['definition']
+    return s.rstrip('?')
+
+def term_options(c,crit):
+    ds=related(c,crit)
+    if len(ds)<3: return None,None
+    return [c['term']]+[d['term'] for d in ds[:3]],ds
+
+def definition_options(c,crit):
+    ds=related(c,crit)
+    if len(ds)<3: return None,None
+    return [c['definition']]+[d['definition'] for d in ds[:3]],ds
+
+def situation_options(c,crit):
+    ds=related(c,crit)
+    if len(ds)<3: return None,None
+    return [scenario_stem(c)]+[scenario_stem(d) for d in ds[:3]],ds
+
+def display_term(c):
+    t=c['term']
+    if '?' in t:
+        return "the improvement step '"+t.rstrip('?')+"'"
+    return t
+
+def gen_for_concept(c,crit,variant):
+    # Returns an original item keyed at option index 0. BL1 stays recognition/recall; BL2 emphasizes comprehension.
+    terms,ds=term_options(c,crit)
+    defs,_=definition_options(c,crit)
+    sits,_=situation_options(c,crit)
+    if not terms or not defs: return None
+    en=explain(c,ds); nl=explain_nl(c,ds); label=display_term(c)
+    common=dict(id=qid(crit),criterion=crit,lo=int(crit.split('.')[0]),tag=c['term'],why=en,whyNl=nl,hook=c['hook'])
+    if crit in BL1:
+        # These assessment criteria are Bloom level 1 in the published exam specification.
+        if variant==0:
+            return dict(common,prompt=f"Which term matches this definition?\n{c['definition']}",options=terms,kind='standard')
+        if variant==1:
+            return dict(common,prompt=f"Which statement about {label} is CORRECT?",options=defs,kind='standard')
+        if variant==2:
+            return dict(common,prompt=f"Complete the statement: [?] is {c['definition'][0].lower()+c['definition'][1:]}",options=terms,kind='missing-word')
+        if variant==3:
+            if crit=='6.1':
+                return dict(common,prompt=f"What is the PRIMARY purpose of {label}?",options=defs,kind='standard')
+            return dict(common,prompt=f"Which definition BEST matches {label}?",options=defs,kind='standard')
+        if variant==4:
+            return dict(common,prompt=f"Which option correctly identifies the term described here?\n{c['definition']}",options=terms,kind='standard')
+        if variant==5:
+            return dict(common,prompt=f"Which statement defines {label}?",options=defs,kind='standard')
+        if variant==6:
+            d=ds[0]
+            return dict(common,prompt=f"Which option correctly distinguishes {label} from {display_term(d)}?",options=[
+                f"{c['term']}: {c['definition']} {d['term']}: {d['definition']}",
+                f"{c['term']}: {d['definition']} {d['term']}: {c['definition']}",
+                f"Both terms mean: {ds[1]['definition']}",
+                f"Both terms mean: {ds[2]['definition']}"],kind='standard')
+    # Bloom level 2: use short application, comparison and correct-statement items.
+    if variant==0:
+        return dict(common,prompt=scenario_stem(c)+"\nWhich option fits this situation?",options=terms,kind='standard')
+    if variant==1:
+        return dict(common,prompt=f"Which statement about {label} is CORRECT?",options=defs,kind='standard')
+    if variant==2:
+        return dict(common,prompt=f"Which situation MOST clearly illustrates {label}?",options=sits,kind='standard')
+    if variant==3:
+        d=ds[0]
+        correct=f"{c['term']} is concerned with {c['definition'][0].lower()+c['definition'][1:]}; {d['term']} is concerned with {d['definition'][0].lower()+d['definition'][1:]}."
+        swapped=f"{c['term']} is concerned with {d['definition'][0].lower()+d['definition'][1:]}; {d['term']} is concerned with {c['definition'][0].lower()+c['definition'][1:]}."
+        return dict(common,prompt=f"Which statement BEST distinguishes {label} from {display_term(d)}?",options=[correct,swapped,
+            f"Both are primarily concerned with {ds[1]['definition'][0].lower()+ds[1]['definition'][1:]}",
+            f"Both are primarily concerned with {ds[2]['definition'][0].lower()+ds[2]['definition'][1:]}"],kind='standard')
+    if variant==4:
+        return dict(common,prompt=f"Which description is consistent with {label}?",options=defs,kind='standard')
+    if variant==5:
+        return dict(common,prompt=f"A team needs to decide whether 
