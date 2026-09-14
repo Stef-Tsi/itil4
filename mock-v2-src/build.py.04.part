@@ -1,0 +1,36 @@
+y for every single value stream","A value stream contains only practices and never value chain activities"],"A value stream uses a particular combination of value chain activities for a product or service scenario.","Een value stream combineert activiteiten uit de service value chain voor een specifieke behoefte. Het is niet één activiteit en de chain wordt niet telkens opnieuw gedefinieerd.","Value stream = a path through the chain."),
+("Which statement about practices and value chain activities is CORRECT?",["A practice can contribute to several value chain activities","Each practice belongs permanently to exactly one value chain activity","Value chain activities replace the need for practices","Only technical management practices can contribute to Obtain/build"],"Practices provide resources and capabilities that can be used across multiple value chain activities.","Practices zijn niet één-op-één vastgezet op één activiteit. Dezelfde practice kan meerdere activiteiten ondersteunen.","Practices can support more than one activity."),
+("Which statement is NOT correct about the service value chain?",["Its activities must always be performed in the published order","It contains six interconnected activities","Its activities can be combined into value streams","It is an operating model within the service value system"],"The six activities are interconnected and flexible; they do not form a mandatory published order.","De onjuiste uitspraak is dat de activiteiten altijd in een vaste volgorde moeten worden uitgevoerd.","Interconnected does not mean sequential."),
+("A new digital service uses Engage, Design and transition, Obtain/build, then returns to Engage before delivery. What does this BEST illustrate?",["Value chain activities can be combined and revisited within a value stream","The first Engage activity was invalid because Engage can occur only once","Every value stream must begin with Plan and end with Improve","The service value chain is a linear process with an exception for Engage"],"Activities can be repeated or revisited as the value stream requires; the chain is not linear.","Activiteiten kunnen opnieuw worden gebruikt wanneer de value stream dat nodig heeft. Dat is normale flexibiliteit, geen uitzondering op een lineair proces.","Activities can be revisited."),
+("Which TWO statements about value streams are correct?\n1. They are specific combinations of activities used to create and deliver products and services.\n2. They must contain every value chain activity exactly once.\n3. Different value streams can use different combinations of value chain activities.\n4. They are identical to processes.",["1 and 3","1 and 2","2 and 4","3 and 4"],"Statements 1 and 3 are correct. Value streams use suitable combinations of activities and are not required to use every activity exactly once.","1 en 3 zijn juist. Value streams kunnen verschillende combinaties van activiteiten gebruiken en zijn niet hetzelfde als processen.","Specific path, flexible combination."),
+("Why is the service value chain described as interconnected?",["Outputs from one activity can become inputs to other activities as value streams move through the chain","Every activity is owned by the same team","All six activities must happen at the same time","Each activity has exactly one fixed predecessor and successor"],"The activities exchange inputs and outputs and can connect in different patterns depending on the value stream.","Interconnected betekent dat activiteiten elkaar via inputs en outputs kunnen voeden in verschillende patronen, niet dat er één vaste voorganger en opvolger is.","Activities connect through inputs and outputs."),
+]
+for p,opts,en,nl,hook in manual_51:
+    add(dict(id=qid('5.1'),criterion='5.1',lo=5,tag='Service value chain',prompt=p,options=opts,why=en,whyNl=nl,hook=hook,kind='list' if 'TWO' in p else ('negative' if 'NOT' in p else 'standard')))
+
+# Membership-style questions: accurate but used sparingly, reflecting official item types.
+manual_membership=[
+('2.2','Guiding principles',"Which option is NOT one of the seven ITIL guiding principles?",['Document every activity','Focus on value','Start where you are','Keep it simple and practical'],"'Document every activity' is not an ITIL guiding principle. The other three are named guiding principles.","'Document every activity' is geen guiding principle; de andere drie wel.","Know the seven names, then watch the NOT."),
+('3.1','Four dimensions',"Which option is NOT one of the four dimensions of service management?",['Governance and compliance','Organizations and people','Information and technology','Partners and suppliers'],"Governance is part of the service value system, not one of the four dimensions. The four dimensions also include value streams and processes.","Governance hoort bij het service value system en is geen van de vier dimensions.","Four dimensions: people, technology, partners, streams/processes."),
+('4.1','Service value system',"Which option is NOT a component of the ITIL service value system?",['Service catalogue','Guiding principles','Governance','Service value chain'],"The service catalogue is not one of the five SVS components. The SVS includes guiding principles, governance, the service value chain, practices and continual improvement.","Service catalogue is geen SVS-component. De vijf componenten zijn guiding principles, governance, service value chain, practices en continual improvement.","SVS: principles, governance, chain, practices, improvement."),
+('5.2','Value chain activities',"Which option is NOT a service value chain activity?",['Authorize changes','Plan','Engage','Deliver and support'],"Authorize changes is not one of the six service value chain activities. Change authorization belongs within change enablement work.","Authorize changes is geen value-chainactiviteit. Plan, Engage en Deliver and support zijn dat wel.","Six activities; change authorization is practice work."),
+]
+for crit,tag,p,opts,en,nl,hook in manual_membership:
+    add(dict(id=qid(crit),criterion=crit,lo=int(crit[0]),tag=tag,prompt=p,options=opts,why=en,whyNl=nl,hook=hook,kind='negative'))
+
+# Add deeper LO7 question forms from curated clues before generic filling.
+for cid in DEEP_PRACTICES:
+    c=C[cid]; ds=related(c,'7.1')
+    # Use the purpose-level practice distractors as close alternatives.
+    for clue in DEEP_CLUES[cid]:
+        opts=[c['term']]+[d['term'] for d in ds[:3]]
+        add(dict(id=qid('7.1'),criterion='7.1',lo=7,tag=c['term'],prompt=clue+'\nWhich practice BEST fits this situation?',options=opts,
+                 why=explain(c,ds),whyNl=explain_nl(c,ds),hook=c['hook'],kind='standard'))
+
+for cid,clues in TERM_CLUES.items():
+    c=C[cid]; ds=related(c,'7.1')
+    for clue in clues:
+        opts=[c['term']]+[d['term'] for d in ds[:3]]
+        if len(opts)==4:
+            add(dict(id=qid('7.1'),criterion='7.1',lo=7,tag=c['term'],prompt=clue+'\nWhich term BEST matches?',options=opts,
+                     why=explain(c,ds),wh
