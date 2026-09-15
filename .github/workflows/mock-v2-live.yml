@@ -56,6 +56,7 @@ jobs:
               page=ctx.new_page(); page.set_default_timeout(20000)
               page.on('pageerror',lambda e:errors.append(str(e)))
               page.on('response',lambda r:failed.append({'url':r.url,'status':r.status}) if r.status>=400 else None)
+              page.on('dialog',lambda d:d.accept())
               page.goto(url,wait_until='networkidle',timeout=90000)
               if 'External Content Notice' in page.title():
                   page.get_by_role('button',name='Open the page',exact=True).click()
