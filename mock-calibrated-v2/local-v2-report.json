@@ -46,6 +46,7 @@
   },
   "checks": [
     "Loaded 432 unique questions; capacity at least 10 full papers; 9 recall + 31 understanding marks",
+    "Exam Terms Lab is loaded and available from the home screen",
     "Focus mode works with English explanation, expanded reading strategy and Dutch help",
     "Full mock starts with 40 questions and 60-minute timer"
   ],
