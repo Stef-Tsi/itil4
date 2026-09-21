@@ -1,5 +1,5 @@
 se,separators=(',',':'))+';window.MOCK_DATA.questions=window.MOCK_BANK||[];\n',encoding='utf-8')
 (OUT/'audit.json').write_text(json.dumps(out['meta'],ensure_ascii=False,indent=2),encoding='utf-8')
-for name in ('index.html','app.css','app.js'):
+for name in ('index.html','app.css','app.js','terms-mode.js'):
     shutil.copy2(Path(__file__).resolve().parent/name,OUT/name)
 print(json.dumps(out['meta'],indent=2))
