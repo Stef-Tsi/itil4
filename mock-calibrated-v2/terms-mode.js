@@ -175,8 +175,8 @@ function choosePairCards(){
  return selected
 }
 function pairGame(){
- const cards=choosePairCards(),defs=mix(cards);
- shell('<section class="card"><span class="kicker">MATCH PAIRS · TAP OR DRAG</span><h1 class="screen-title">Which meaning belongs to which term?</h1><p class="small">Tap a term, then tap its short meaning. On desktop you can also drag a term onto a meaning.</p><div class="tl-score" id="pair-score">0 / 4 matched</div><div class="tl-pairbox"><div class="tl-paircol">'+cards.map(c=>'<button class="tl-pair" draggable="true" data-term="'+esc(c.id)+'"><b>'+esc(c.term)+'</b></button>').join('')+'</div><div class="tl-paircol">'+defs.map(c=>'<button class="tl-pair" data-def="'+esc(c.id)+'">'+esc(c.mem)+'</button>').join('')+'</div></div><div id="pair-fb"></div></section>');
+ const cards=choosePairCards(),termCards=mix(cards),defs=mix(cards);
+ shell('<section class="card"><span class="kicker">MATCH PAIRS · TAP OR DRAG</span><h1 class="screen-title">Which meaning belongs to which term?</h1><p class="small">Tap a term, then tap the definition that belongs to it. The definition does not contain the answer. On desktop you can also drag.</p><div class="tl-score" id="pair-score">0 / 4 matched</div><div class="tl-pairbox"><div class="tl-paircol">'+termCards.map(c=>'<button class="tl-pair" draggable="true" data-term="'+esc(c.id)+'"><b>'+esc(c.term)+'</b></button>').join('')+'</div><div class="tl-paircol">'+defs.map(c=>'<button class="tl-pair" data-def="'+esc(c.id)+'">'+esc(c.cue)+'</button>').join('')+'</div></div><div id="pair-fb"></div></section>');
  let chosen=null,done=new Set(),right=0;
  const terms=[...document.querySelectorAll('[data-term]')],defsEls=[...document.querySelectorAll('[data-def]')];
  function selectTerm(b){if(done.has(b.dataset.term))return;terms.forEach(x=>x.classList.remove('tl-selected'));chosen=b.dataset.term;b.classList.add('tl-selected')}
