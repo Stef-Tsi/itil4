@@ -206,6 +206,7 @@ main{width:min(100%,620px);margin:0 auto;padding:16px 14px 30px}
 .score-ring{display:grid;place-items:center;width:150px;height:150px;margin:18px auto;border-radius:50%;background:conic-gradient(var(--cyan) var(--score),#172a43 0);box-shadow:inset 0 0 0 13px #081221}
 .score-ring div{text-align:center}.score-ring b{display:block;font-size:32px}.score-ring small{color:var(--muted)}
 .result-cards{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.result-share{margin:16px 0}.result-share p{color:var(--muted);font-size:14px;line-height:1.5}.result-share details{margin-top:12px}.result-share summary{cursor:pointer;font-weight:700}.result-report-text{display:block;width:100%;min-height:260px;margin-top:12px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text);font:14px/1.5 monospace;resize:vertical;user-select:text;-webkit-user-select:text}
 .review-list{display:grid;gap:9px;margin-top:12px}
 .review-item{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:12px}
 .review-item b{display:block;font-size:13px;line-height:1.4;margin-bottom:6px}.review-item p{margin:4px 0;color:var(--muted);font-size:12px;line-height:1.45}.review-item .right{color:var(--green)}
@@ -391,6 +392,11 @@ main{width:min(100%,620px);margin:0 auto;padding:16px 14px 30px}
  <div id="scoreRing" class="score-ring" style="--score:0%"><div><b id="resultScore">0/0</b><small id="resultPct">0%</small></div></div>
  <div class="result-cards"><div class="stat-card"><b id="resultXp">+0 XP</b><small>XP earned</small></div><div class="stat-card"><b id="resultCombo">×0</b><small>best drill combo</small></div></div>
  <div id="resultBreakdown" class="result-breakdown"></div>
+ <div class="result-share">
+  <button id="copyResultReport" class="btn btn-primary big-action">Copy full result</button>
+  <p>Copy your score, every question, your answers and the explanations. Paste the report into your chat for a detailed review.</p>
+  <details id="resultReportPanel"><summary>View report text</summary><p>If automatic copying is unavailable, select and copy the text below.</p><textarea id="resultReportText" class="result-report-text" readonly rows="12" spellcheck="false" aria-label="Full result report"></textarea></details>
+ </div>
  <div class="section-title"><div><h2 id="reviewHeading">Answer review</h2></div></div><div id="reviewList" class="review-list"></div>
  <button id="retryErrors" class="btn btn-secondary big-action hidden">Retry mistakes from this run</button>
  <button id="closeResult" class="btn btn-primary big-action">Back to practice</button></div>
@@ -398,7 +404,7 @@ main{width:min(100%,620px);margin:0 auto;padding:16px 14px 30px}
 
  <div id="modalBackdrop" class="modal-backdrop hidden"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-handle"></div><h2 id="modalTitle"></h2><div id="modalBody"></div><div id="modalActions" class="modal-actions"></div></div></div>
 
-<script id="gameData" type="application/json">{"meta":{"title":"ITIL 4: Service City — Incident Zero","version":"5.0.0","language":"en","contentBasis":"ITIL 4 Foundation syllabus v4.2 (March 2025)","verifiedOn":"2026-10-12","unofficial":true,"exam":{"questions":40,"minutes":60,"passScore":26,"passPercent":65,"closedBook":true,"blueprint":{"LO1":5,"LO2":6,"LO3":2,"LO4":1,"LO5":2,"LO6":7,"LO7":17}},"notice":"Independent practice tool with original English questions. Not an official exam. Validate preparation using official sample papers."},"learningOutcomes":{"LO1":{"title":"Service management concepts","weight":12.5,"marks":5,"book":"2.0–2.5"},"LO2":{"title":"Guiding principles","weight":15.0,"marks":6,"book":"4.3"},"LO3":{"title":"Four dimensions","weight":5.0,"marks":2,"book":"3"},"LO4":{"title":"Service value system","weight":2.5,"marks":1,"book":"4.1"},"LO5":{"title":"Service value chain","weight":5.0,"marks":2,"book":"4.5"},"LO6":{"title":"Practice purposes and key terms","weight":17.5,"marks":7,"book":"5.1–5.3"},"LO7":{"title":"Seven practices in detail","weight":42.5,"marks":17,"book":"4.6 and 5.1–5.2"}},"chapters":[{"id":1,"lo":"LO1","title":"Service management concepts","subtitle":"5 of 40 exam marks • targeted practice","icon":"⚓","color":"#35d0ba","boss":"The Cost Storm","story":"Distinguish value, outcomes, utility and warranty, and identify consumer roles."},{"id":2,"lo":"LO2","title":"Guiding principles","subtitle":"6 of 40 exam marks • targeted practice","icon":"🧭","color":"#8b7cff","boss":"The Complexity Dragon","story":"Use the guiding principles together to support useful decisions."},{"id":3,"lo":"LO3","title":"Four dimensions","subtitle":"2 of 40 exam marks • targeted practice","icon":"◈","color":"#5da9ff","boss":"Tunnel Vision","story":"Consider people, information, partners and coordinated work together."},{"id":4,"lo":"LO4","title":"Service value system","subtitle":"1 of 40 exam marks • targeted practice","icon":"◎","color":"#f5b942","boss":"The System Break","story":"Connect the service value system components to value creation."},{"id":5,"lo":"LO5","title":"Service value chain","subtitle":"2 of 40 exam marks • targeted practice","icon":"⛓","color":"#ff8f70","boss":"The Linear Trap","story":"Recognize flexible value streams and the six value chain activities."},{"id":6,"lo":"LO6","title":"Practice purposes and key terms","subtitle":"7 of 40 exam marks • targeted practice","icon":"▦","color":"#ce7cff","boss":"The Name Switcher","story":"Distinguish practice purposes and their key definitions."},{"id":7,"lo":"LO7","title":"Seven practices in detail","subtitle":"17 of 40 exam marks • targeted practice","icon":"🛡","color":"#ff5d73","boss":"Incident Zero","story":"Understand the seven detailed practices and their common exam confusions."}],"questions":[],"glossary":[],"practicePurposes":[],"practiceTerms":[],"lessons":{}}</script>
+<script id="gameData" type="application/json">{"meta":{"title":"ITIL 4: Service City — Incident Zero","version":"5.1.0","language":"en","contentBasis":"ITIL 4 Foundation syllabus v4.2 (March 2025)","verifiedOn":"2026-10-12","unofficial":true,"exam":{"questions":40,"minutes":60,"passScore":26,"passPercent":65,"closedBook":true,"blueprint":{"LO1":5,"LO2":6,"LO3":2,"LO4":1,"LO5":2,"LO6":7,"LO7":17}},"notice":"Independent practice tool with original English questions. Not an official exam. Validate preparation using official sample papers."},"learningOutcomes":{"LO1":{"title":"Service management concepts","weight":12.5,"marks":5,"book":"2.0–2.5"},"LO2":{"title":"Guiding principles","weight":15.0,"marks":6,"book":"4.3"},"LO3":{"title":"Four dimensions","weight":5.0,"marks":2,"book":"3"},"LO4":{"title":"Service value system","weight":2.5,"marks":1,"book":"4.1"},"LO5":{"title":"Service value chain","weight":5.0,"marks":2,"book":"4.5"},"LO6":{"title":"Practice purposes and key terms","weight":17.5,"marks":7,"book":"5.1–5.3"},"LO7":{"title":"Seven practices in detail","weight":42.5,"marks":17,"book":"4.6 and 5.1–5.2"}},"chapters":[{"id":1,"lo":"LO1","title":"Service management concepts","subtitle":"5 of 40 exam marks • targeted practice","icon":"⚓","color":"#35d0ba","boss":"The Cost Storm","story":"Distinguish value, outcomes, utility and warranty, and identify consumer roles."},{"id":2,"lo":"LO2","title":"Guiding principles","subtitle":"6 of 40 exam marks • targeted practice","icon":"🧭","color":"#8b7cff","boss":"The Complexity Dragon","story":"Use the guiding principles together to support useful decisions."},{"id":3,"lo":"LO3","title":"Four dimensions","subtitle":"2 of 40 exam marks • targeted practice","icon":"◈","color":"#5da9ff","boss":"Tunnel Vision","story":"Consider people, information, partners and coordinated work together."},{"id":4,"lo":"LO4","title":"Service value system","subtitle":"1 of 40 exam marks • targeted practice","icon":"◎","color":"#f5b942","boss":"The System Break","story":"Connect the service value system components to value creation."},{"id":5,"lo":"LO5","title":"Service value chain","subtitle":"2 of 40 exam marks • targeted practice","icon":"⛓","color":"#ff8f70","boss":"The Linear Trap","story":"Recognize flexible value streams and the six value chain activities."},{"id":6,"lo":"LO6","title":"Practice purposes and key terms","subtitle":"7 of 40 exam marks • targeted practice","icon":"▦","color":"#ce7cff","boss":"The Name Switcher","story":"Distinguish practice purposes and their key definitions."},{"id":7,"lo":"LO7","title":"Seven practices in detail","subtitle":"17 of 40 exam marks • targeted practice","icon":"🛡","color":"#ff5d73","boss":"Incident Zero","story":"Understand the seven detailed practices and their common exam confusions."}],"questions":[],"glossary":[],"practicePurposes":[],"practiceTerms":[],"lessons":{}}</script>
 <script>
 (() => {
 "use strict";
@@ -475,6 +481,7 @@ let campaign={lo:"LO1",index:0};
 let timerHandle=null;
 let touchStartX=0;
 let lastWrongIds=[];
+let activeResultRecord=null;
 let pendingImport=null;
 let focusBeforeModal=null;
 
@@ -790,6 +797,9 @@ function finishAndShow(answers,exam){
 }
 function presentResult(record){
  if(!Array.isArray(record.answers)||!record.answers.every(validQuestion)){toast('This older result has no complete answer review. Its score remains in history.');return}
+ activeResultRecord=record;
+ $("#resultReportPanel").open=false;
+ $("#resultReportText").value=resultReportText(record);
  const {score,total,exam,answers}=record,pct=Math.round(score/total*100),pass=exam?score>=26:pct>=65;
  $("#battleOverlay").classList.add("hidden");$("#summaryOverlay").classList.add("hidden");$("#resultOverlay").classList.remove("hidden");
  $("#resultOverlay").scrollTop=0;
@@ -808,6 +818,54 @@ function presentResult(record){
   return `<div class="lo-stat"><div class="lo-head"><b>${lo} · ${escapeHtml(m.title)}</b><span>${list.filter(a=>a.good).length}/${list.length}</span></div></div>`;
  }).join("");
  document.body.style.overflow="hidden";$(".app").setAttribute("aria-hidden","true");
+}
+
+function resultReportText(record){
+ const {score,total,exam,answers}=record;
+ const percent=Math.round(score/total*100);
+ const seconds=Math.max(0,Math.round(Number(record.seconds)||0));
+ const elapsed=`${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`;
+ const lines=[
+  'ITIL 4 FOUNDATION — FULL PRACTICE RESULT',
+  `Mode: ${exam?'Timed practice exam':'Practice drill'}`,
+  `Completed: ${record.date||'Not recorded'}`,
+  `Question bank revision: ${record.revision||'Earlier revision'}`,
+  `Score: ${score}/${total} (${percent}%)`,
+  `Time used: ${elapsed}`
+ ];
+ if(exam){lines.push(`Practice result: ${score>=26?'Passed':'Below the pass mark'} (pass mark: 26/40)`);if(record.duration)lines.push(`Time limit: ${record.duration/60000} minutes`)}
+ if(Number.isInteger(record.freshCount))lines.push(`Questions unseen at the start: ${record.freshCount}/${total}`);
+ lines.push('','LEARNING OUTCOME BREAKDOWN');
+ for(const [lo,meta] of Object.entries(D.learningOutcomes)){
+  const items=answers.filter(a=>a.lo===lo);if(!items.length)continue;
+  lines.push(`${lo} — ${meta.title}: ${items.filter(a=>a.chosen===a.answer).length}/${items.length}`);
+ }
+ lines.push('','ALL QUESTIONS AND ANSWERS');
+ answers.forEach((a,index)=>{
+  const selected=Number.isInteger(a.chosen)&&a.chosen>=0&&a.chosen<4;
+  const good=selected&&a.chosen===a.answer;
+  lines.push('',`${index+1}. ${!selected?'UNANSWERED':good?'CORRECT':'INCORRECT'} | ${a.lo} | ${a.topic}`,`Question ID: ${a.id}`,a.prompt);
+  if(a.statements?.length){lines.push('Statements:');a.statements.forEach((statement,i)=>lines.push(`${i+1}. ${statement}`))}
+  a.options.forEach((option,i)=>lines.push(`${'ABCD'[i]}. ${option}`));
+  lines.push(`Your answer: ${selected?`${'ABCD'[a.chosen]}. ${a.options[a.chosen]}`:'No answer selected'}`,`Correct answer: ${'ABCD'[a.answer]}. ${a.options[a.answer]}`);
+  if(!selected)lines.push('Unanswered questions receive zero marks.');
+  lines.push('Explanations for all four options:');
+  a.rationales.forEach((reason,i)=>lines.push(`${'ABCD'[i]}. ${i===a.answer?'CORRECT':selected&&i===a.chosen?'YOUR INCORRECT ANSWER':'INCORRECT'}: ${reason}`));
+  if(a.source)lines.push(`Reference: ${a.source}`);
+ });
+ return lines.join('\n');
+}
+async function copyResultReport(){
+ if(!activeResultRecord)return;
+ const text=resultReportText(activeResultRecord),field=$("#resultReportText");field.value=text;
+ try{
+  if(!navigator.clipboard?.writeText)throw new Error('Clipboard unavailable');
+  await navigator.clipboard.writeText(text);
+  toast('Full result copied. Paste it into your chat.');
+ }catch{
+  $("#resultReportPanel").open=true;field.focus();field.select();field.setSelectionRange(0,text.length);
+  toast('Select and copy the report text below.');
+ }
 }
 
 function closeResult(){
@@ -986,6 +1044,7 @@ $("#examPrevious").addEventListener("click",()=>{if(session?.mode==="exam"&&sess
 $("#examOverview").addEventListener("click",()=>{if(session?.mode==="exam")showExamSummary()});
 $("#examDuration").addEventListener("change",renderExamHub);
 $("#closeResult").addEventListener("click",closeResult);
+$("#copyResultReport").addEventListener("click",copyResultReport);
 $("#flashCard").addEventListener("click",()=>{flash.flipped=!flash.flipped;renderFlash()});
 $("#flashPrev").addEventListener("click",()=>moveFlash(-1));$("#flashNext").addEventListener("click",()=>moveFlash(1));
 $("#cardKnown").addEventListener("click",()=>markCard(true));$("#cardLearn").addEventListener("click",()=>markCard(false));
