@@ -1,3 +1,29 @@
+# Review update — 11 November 2026
+
+Active bank revision: `strict-v6-20261111`. Item IDs intentionally remain stable to preserve question familiarity; saved sessions and historical results retain their original snapshots.
+
+## Scope and findings
+
+Reviewed the 168 existing English questions, options and option-specific explanations against the published ITIL 4 Foundation scope and exam specification linked below. This is an editorial review, not validation against confidential exam items or measured candidate difficulty.
+
+26 items changed: 023, 032, 051, 059, 089, 090, 094, 097, 099, 108, 112, 115, 120, 124, 129, 130, 131, 134, 139, 140, 145, 147, 158, 162, 163, 166.
+
+- Corrected two swapped explanations in item 051 (service offering versus four dimensions).
+- Corrected explanations left over from earlier prompt edits in items 023, 032 and 094.
+- Replaced item 097's unsupported ranking of change-schedule purposes with an unambiguous question about using change history during incident investigation.
+- Reworded the incident/problem distinction (112) and utility/warranty example (147) in direct English.
+- Revised item 140 to distinguish a directly measured business outcome from supporting technical measures without suggesting that response-time targets cannot be business-relevant.
+- Improved alternatives across improvement, change, incident, problem, request, desk and service-level topics. Avoided unnecessary absolutes and implausible distractors where they made guessing too easy.
+- Updated associated memory text so it agrees with the revised answers.
+
+The 168-item bank, criterion quotas, question styles, 60/75-minute settings, 26/40 pass mark, full English feedback and result-copy feature remain. No claim is made that difficulty is identical to a live paper. Use an official sample paper separately for an independent check.
+
+## Verification
+
+`npm install` then `npm test` (Node 24) runs the committed DOM integration checks. Checks cover 100 sampled papers and their criterion/Bloom quotas, shuffled answers and explanations, pass/fail boundaries, full review, result copying and fallback, expiry, stored sessions including revisions 4 and 5, imports/exports and existing learning modes. These tests validate behaviour and data integrity, not the educational validity of questions.
+
+## Earlier review (historical)
+
 # ITIL 4 Foundation question and application review
 
 Reviewed and verified on 12 October 2026. Active revision: `strict-v5-20261012`.

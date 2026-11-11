@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "scripts": {
+    "test": "node tests/exam.cjs && node tests/copy-result.cjs"
+  },
+  "devDependencies": {
+    "jsdom": "30.1.2"
+  }
+}
